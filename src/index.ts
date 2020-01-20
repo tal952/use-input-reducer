@@ -2,7 +2,7 @@ import { useReducer, ChangeEvent, Reducer } from 'react';
 
 interface Change {
   name: string;
-  value: any;
+  value: string;
 }
 
 /**
@@ -17,7 +17,11 @@ interface Change {
  * };
  * ```
  */
-const useInputReducer = <T>(initialState: T) => {
+const useInputReducer = <
+  T extends { [key: string]: string | string[] | number }
+>(
+  initialState: T
+) => {
   const [state, dispatch] = useReducer<Reducer<T, Change>>(
     (state, { name, value }) => ({
       ...state,
@@ -29,11 +33,11 @@ const useInputReducer = <T>(initialState: T) => {
   const inputAttrs = (name: keyof T) => ({
     name,
     value: state[name],
-    onChange: ({ target: { name, value } }: ChangeEvent<HTMLInputElement>) =>
+    onChange: <G extends Change>({ target: { name, value } }: ChangeEvent<G>) =>
       dispatch({ name, value }),
   });
 
-  return [state, inputAttrs] as [T, typeof inputAttrs];
+  return [state, inputAttrs] as [{ [P in keyof T]: string }, typeof inputAttrs];
 };
 
 export default useInputReducer;
